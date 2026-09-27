@@ -1,77 +1,120 @@
-# Stagecoach DP GUI (Streamlit + Tailwind)
+# Stagecoach Dynamic Programming Solver
 
 Made by [Visqy](https://github.com/Visqy) and [AkmalMakarim](https://github.com/AkmalMakarim).
 
-Aplikasi GUI sederhana untuk memecahkan **Stagecoach Dynamic Programming** (layered shortest/longest path) dan memvisualisasikan **semua jalur optimal**. Antarmuka dibuat dengan **Streamlit** dan styling **Tailwind CSS via CDN**. Solver, rekonstruksi jalur, dan visualisasi graf disediakan oleh modul lokal `stagecoach.py`.
+An interactive Python application for solving and visualizing the **Stagecoach Problem** using dynamic programming.
 
-## Fitur
+The application models a layered graph in which decisions are made stage by stage. Users can define the graph, choose whether to minimize or maximize the objective, inspect the backward dynamic programming process, reconstruct all optimal paths, and visualize the resulting graph through a Streamlit interface.
 
-- Input ber-stage (`layers`) dan bobot antar-node (`edges`) dalam format JSON.
-- Memilih **mode optimasi**: `min` (biaya minimum) atau `max` (nilai maksimum).
-- Memilih **operasi agregasi**: `+` (penjumlahan) atau `*` (perkalian).
-- Tabel proses DP per stage (mundur).
-- Rekonstruksi **semua** jalur optimal.
-- Visualisasi graf dengan opsi unduh PNG.
+## Overview
 
-## Struktur Berkas
+The Stagecoach Problem is a multistage optimization problem in which a path must be selected through a sequence of stages while minimizing or maximizing an accumulated objective.
 
-```
+This project turns that formulation into an interactive solver. Instead of working only with a static example, users can provide their own staged graph and edge weights in JSON format, run the solver, inspect the dynamic programming values computed at each stage, and compare the resulting optimal paths visually.
+
+The project separates the interface from the core solver logic: `app.py` provides the Streamlit GUI, while `stagecoach.py` handles the dynamic programming computation, optimal-path reconstruction, and graph visualization.
+
+## Features
+
+- Define staged nodes (`layers`) and weighted transitions (`edges`) using JSON.
+- Choose the optimization objective:
+  - `min` for minimum cost/value.
+  - `max` for maximum value.
+- Choose the aggregation operation:
+  - `+` for additive objectives.
+  - `*` for multiplicative objectives.
+- Inspect the **backward dynamic programming computation** stage by stage.
+- Reconstruct **all optimal paths**, not only a single solution.
+- Visualize the stagecoach graph and download the generated graph as a PNG image.
+- Validate graph structure before solving.
+
+## Project Structure
+
+```text
 .
-├── app.py          # Streamlit GUI
-├── stagecoach.py    # Solver DP + rekonstruksi jalur + plotter
-├── requirements.txt
+├── app.py            # Streamlit user interface
+├── stagecoach.py     # DP solver, optimal-path reconstruction, and graph plotting
+├── requirements.txt  # Python dependencies
 └── README.md
 ```
 
-## Prasyarat
+## Requirements
 
-- Python **3.9+** (disarankan 3.10/3.11)
-- Pip terbaru: `python -m pip install --upgrade pip`
+- Python **3.9+** (Python 3.10 or 3.11 recommended)
+- `pip`
 
-## Instalasi Cepat
+## Installation
+
+Clone the repository and move into the project directory:
 
 ```bash
-# (Opsional) buat virtual environment
-python -m venv .venv
-# Windows
-.venv\Scripts\activate
-# macOS / Linux
-source .venv/bin/activate
+git clone https://github.com/Visqy/stagecoach-solver-gui.git
+cd stagecoach-solver-gui
+```
 
-# Instal dependensi
+Create a virtual environment:
+
+```bash
+python -m venv .venv
+```
+
+Activate it on Windows:
+
+```bash
+.venv\Scripts\activate
+```
+
+Or on macOS/Linux:
+
+```bash
+source .venv/bin/activate
+```
+
+Install the required dependencies:
+
+```bash
 pip install -r requirements.txt
 ```
 
-## Menjalankan Aplikasi
+## Running the Application
 
-Di direktori proyek yang sama dengan `main.py` dan `stagecoach.py`:
+Start the Streamlit application from the project directory:
 
 ```bash
-# Cara umum
-streamlit run main.py
-
-# Jika 'streamlit' tidak dikenali di Windows PowerShell/CMD:
-python -m streamlit run main.py
+streamlit run app.py
 ```
 
-Setelah berjalan, Streamlit akan membuka aplikasi di browser pada alamat `http://localhost:8501` (default).
+If the `streamlit` command is not recognized, use:
 
-## Cara Pakai Singkat
+```bash
+python -m streamlit run app.py
+```
 
-1. Buka aplikasi, isi **Layers** dan **Edges** di **sidebar** dalam format JSON, atau klik **Gunakan Contoh**.
-2. Tentukan **Start**, **Goal**, **Mode Optimasi** (`min|max`), dan **Operasi Agregasi** (`+|*`).
-3. Klik **Jalankan Solver**.
-4. Lihat hasil:
-   - **Hasil**: biaya optimal, salah satu path terpilih, dan daftar semua jalur optimal.
-   - **Proses**: tabel per stage dari perhitungan DP.
-   - **Visualisasi**: graf stagecoach, dapat diunduh sebagai PNG.
-   - **Tentang**: ringkasan opsi dan contoh input valid.
+Streamlit will normally open the application in your browser at:
 
-## Format Input (JSON)
+```text
+http://localhost:8501
+```
+
+## Usage
+
+1. Open the application.
+2. Define the **Layers** and **Edges** in JSON format, or load the provided example.
+3. Select the **Start** and **Goal** nodes.
+4. Choose the optimization mode (`min` or `max`).
+5. Choose the aggregation operation (`+` or `*`).
+6. Run the solver.
+7. Inspect the results:
+   - **Result** — optimal value, one selected optimal path, and the complete set of optimal paths.
+   - **Process** — the dynamic programming computation for each stage.
+   - **Visualization** — the staged graph and its optimal solution paths.
+   - **About** — a summary of available options and valid input examples.
+
+## Input Format
 
 ### Layers
 
-`layers` adalah list of list berurutan dari kiri ke kanan (stage 0, 1, ..., K).
+`layers` is an ordered list of lists representing the graph from the first stage to the final stage.
 
 ```json
 [
@@ -82,14 +125,17 @@ Setelah berjalan, Streamlit akan membuka aplikasi di browser pada alamat `http:/
 ]
 ```
 
-- **Start** harus berada di **stage 0**.
-- **Goal** harus berada di **stage terakhir**.
+The selected **Start** node must belong to the first stage, while the **Goal** node must belong to the final stage.
 
 ### Edges
 
-`edges` adalah dict-of-dict: source -> {target: biaya}.
+`edges` uses a nested dictionary structure:
 
-- **Wajib** menghubungkan **stage i** ke **stage i+1** saja (tidak boleh melompat stage).
+```text
+source -> {target: weight}
+```
+
+Example:
 
 ```json
 {
@@ -101,7 +147,9 @@ Setelah berjalan, Streamlit akan membuka aplikasi di browser pada alamat `http:/
 }
 ```
 
-### Contoh Konfigurasi Lengkap
+Each edge must connect a node in stage `i` to a node in stage `i + 1`. Edges that skip stages are rejected by validation.
+
+## Complete Configuration Example
 
 ```json
 {
@@ -120,18 +168,38 @@ Setelah berjalan, Streamlit akan membuka aplikasi di browser pada alamat `http:/
 }
 ```
 
-## Catatan & Batasan
+## Solver Behavior and Constraints
 
-- Edge **harus** dari stage i ke stage i+1. Jika tidak, validasi akan gagal.
-- Node tidak boleh duplikat di `layers`.
-- `opt_mode="min"` menggunakan inisialisasi `+∞`, `opt_mode="max"` menggunakan `-∞`.
-- Untuk `combine_op="*"`, nilai terminal (di goal) = `1.0`. Untuk `+`, nilai terminal = `0.0`.
-- Visualisasi menggunakan Matplotlib; pada environment server tanpa display, Streamlit akan menangani backend headless.
+- Edges must connect consecutive stages only.
+- Nodes must not appear more than once in `layers`.
+- For `opt_mode="min"`, the solver uses `+∞` as the initial comparison value.
+- For `opt_mode="max"`, the solver uses `-∞` as the initial comparison value.
+- For additive objectives (`combine_op="+"`), the terminal value at the goal node is `0.0`.
+- For multiplicative objectives (`combine_op="*"`), the terminal value at the goal node is `1.0`.
+- Graph visualization uses Matplotlib. When running in a server environment without a display, Streamlit handles the headless backend.
 
 ## Troubleshooting
 
-- **"streamlit: command not found" atau "not recognized"** Jalankan `python -m streamlit run main.py` atau pastikan virtual env aktif.
-- **"Gagal mengimpor modul stagecoach.py"** Pastikan `stagecoach.py` berada di folder yang sama dengan `main.py`.
-- **"Edge melompat stage"** Periksa bahwa setiap edge hanya menghubungkan node di stage i ke node di stage i+1.
-- **Graf kosong / jalur tidak muncul**
-  Periksa kembali input JSON; gunakan contoh sebagai baseline, lalu ubah sedikit demi sedikit.
+### `streamlit: command not found` or `streamlit is not recognized`
+
+Make sure the virtual environment is active, or run:
+
+```bash
+python -m streamlit run app.py
+```
+
+### `Failed to import stagecoach.py`
+
+Make sure `stagecoach.py` is located in the same project directory as `app.py`.
+
+### Validation reports that an edge skips a stage
+
+Check that every edge connects a node in stage `i` directly to a node in stage `i + 1`.
+
+### The graph is empty or no path is shown
+
+Verify the JSON input and graph connectivity. A practical way to debug the input is to start from the provided example and modify it incrementally.
+
+## Purpose
+
+This project demonstrates how a multistage dynamic programming formulation can be translated into an interactive software tool, combining algorithmic computation, input validation, optimal-path reconstruction, and graph-based visualization in a single application.
